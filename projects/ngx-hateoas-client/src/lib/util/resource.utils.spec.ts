@@ -12,7 +12,8 @@ import {
   rawResource,
   rawResourceCollection,
   SimpleResource,
-  SimpleResourceProjection
+  SimpleResourceProjection,
+  NestingProjection
 } from '../model/resource/resources.test';
 import { Include } from '../model/declarations';
 import { HateoasResource } from '../model/decorators';
@@ -130,6 +131,21 @@ describe('ResourceUtils', () => {
     expect(result['rawResource']).toBeDefined();
     expect(result['rawResource'] instanceof RawResource).toBeTrue();
   });
+
+  it('INSTANTIATE_RESOURCE projection should support nesting a list of another projection type', () => {
+    const resourceProjection = new SimpleResourceProjection();
+    resourceProjection.rawResource = new RawResource();
+
+    const nestingProjection = new NestingProjection();
+    nestingProjection.nestedProjectionList = [resourceProjection];
+    const result = ResourceUtils.instantiateResource({
+      ...nestingProjection
+    });
+    expect(result instanceof Resource).toBeTrue();
+    expect(result['nestedProjectionList']).toBeDefined();
+    expect(result['nestedProjectionList'][0] instanceof Resource).toBeTrue();
+  });
+
 
   it('INSTANTIATE_RESOURCE define resource type should be case insensitive #1', () => {
 

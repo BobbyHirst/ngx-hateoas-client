@@ -82,6 +82,21 @@ export class SimpleResourceProjection extends Resource {
 
 }
 
+@HateoasProjection(RawResource, 'nestedProjection')
+export class NestingProjection extends Resource {
+  @ProjectionRel(SimpleResource)
+  public nestedProjectionList: SimpleResourceProjection[]
+    // tslint:disable-next-line:variable-name
+    _links = {
+      self: {
+        href: 'http://localhost:8080/api/v1/resource/1'
+      },
+      test: {
+        href: 'http://localhost:8080/api/v1/resource/1'
+      }
+    };
+}
+
 @HateoasEmbeddedResource(['anotherResource'])
 export class SimpleEmbeddedResource extends EmbeddedResource {
 

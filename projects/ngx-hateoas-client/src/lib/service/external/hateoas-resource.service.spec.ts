@@ -2,7 +2,7 @@
 import { HateoasResourceService } from './hateoas-resource.service';
 import { HateoasResource, HttpMethod, Include, Resource } from '../../ngx-hateoas-client.module';
 import { of } from 'rxjs';
-import { SimpleResource } from '../../model/resource/resources.test';
+import { NestingProjection, SimpleResource, SimpleResourceProjection, RawResource } from '../../model/resource/resources.test';
 import { ResourceUtils } from '../../util/resource.utils';
 import { RequestOption, RequestParam } from '../../model/declarations';
 import anything = jasmine.anything;
@@ -39,6 +39,7 @@ describe('HateoasResourceService', () => {
       customQuery: jasmine.createSpy('customQuery')
     };
     resourceHttpServiceSpy = {
+      getResource: jasmine.createSpy('getResource'),
       postResource: jasmine.createSpy('postResource'),
       put: jasmine.createSpy('put'),
       putResource: jasmine.createSpy('putResource'),
@@ -714,6 +715,27 @@ describe('HateoasResourceService', () => {
         const url = commonHttpServiceSpy.customQuery.calls.argsFor(0)[2];
         expect(url).toBeDefined();
         expect(url).toBe('/search/searchQuery');
+      });
+  });
+  
+  it('GET_RESOURCE should support nested projections', () => {
+
+    const resourceProjection = new SimpleResourceProjection();
+    resourceProjection.rawResource = new RawResource();
+
+    const nestingProjection = new NestingProjection();
+    nestingProjection.nestedProjectionList = [resourceProjection];
+    const result = ResourceUtils.instantiateResource({
+      ...nestingProjection
+    });
+
+    resourceHttpServiceSpy.getResource.and.returnValue(of(result));
+    const resourceWithRelation = new ResourceWithRelation();
+    resourceWithRelation.relation = new ResourceRelation();
+
+    hateoasResourceService.getResource(NestingProjection, 123, {params: {projection: "nesting"}})
+      .subscribe((value) => {
+        expect(value instanceof Resource).toBeTrue();
       });
   });
 
